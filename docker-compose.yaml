@@ -1,0 +1,66 @@
+version: "3.7"
+services:
+  app:
+    build:
+      args:
+        user: me
+        uid: 1000
+      context: ./
+      dockerfile: docker/app/Dockerfile
+    image: symfony
+    container_name: symfony-app
+    restart: unless-stopped
+    working_dir: /var/www/
+    volumes:
+      - ./:/var/www
+    networks:
+      - symfony-network
+
+  db:
+    image: mariadb:latest
+    container_name: symfony-db
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_USER: ${DB_USERNAME}
+      SERVICE_TAGS: dev
+      SERVICE_NAME: mysql
+    volumes:
+      - symfony-data:/var/lib/mysql
+    networks:
+      - symfony-network
+
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: symfony-pma
+    ports:
+      - 8080:80
+    environment:
+      PMA_HOST: db
+      MYSQL_USERNAME: "${DB_USERNAME}"
+      MYSQL_ROOT_PASSWORD: "${DB_PASSWORD}"
+      UPLOAD_LIMIT: 300M
+    restart: unless-stopped
+    networks:
+      - symfony-network
+
+  nginx:
+    image: nginx:alpine
+    container_name: symfony-nginx
+    restart: unless-stopped
+    ports:
+      - 8000:80
+    volumes:
+      - ./:/var/www
+      - ./docker/nginx:/etc/nginx/conf.d/
+    networks:
+      - symfony-network
+
+networks:
+  symfony-network:
+    driver: bridge
+
+volumes:
+  symfony-data:

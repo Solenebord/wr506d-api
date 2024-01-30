@@ -1,0 +1,63 @@
+#create docker and start (IN THIS ORDER!!)
+docker-compose build app
+docker-compose up -d
+
+# open container bash
+docker exec -ti symfony-app /bin/bash
+cd symfony
+
+
+
+## to install projet (INSIDE THE DOCKER APP)
+
+# Get symfony CLI (optional)
+curl -sS https://get.symfony.com/cli/installer | bash
+export PATH="$HOME/.symfony5/bin:$PATH"
+
+# install
+composer install
+
+#create db
+php bin/console doctrine:database:create
+
+# run migration
+php bin/console doctrine:migrations:migrate
+
+# seed db
+php bin/console doctrine:fixtures:load
+
+# generate jwt
+php bin/console lexik:jwt:generate-keypair
+
+
+
+## COMMANDS REMINDER
+
+# to acces an image on local
+http://localhost:8000/uploads/actor.png
+
+# Create symfony project
+composer create-project symfony/skeleton:"7.0.*" symfony
+cd symfony
+
+# If webapp and not API
+composer require webapp
+## grant Y to all questions
+
+# edit /symfony/.env
+# comment 
+# DATABASE_URL="postgresql://app:!ChangeMe!@127.0.0.1:5432/app?serverVersion=16&charset=utf8"
+# add
+DATABASE_URL="mysql://root:root@db:3306/symfony?serverVersion=10.11.2-MariaDB&charset=utf8mb4"
+
+# make controller
+symfony console make:controller
+
+# make entity
+symfony console make:entity User
+
+# create migration file
+symfony console make:migration
+
+# clear cache 
+symfony console cache:clear
